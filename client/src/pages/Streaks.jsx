@@ -41,7 +41,7 @@ export default function Streaks() {
       ) : (
         <div className="streak-list">
           {streaks.map((habit) => (
-            <div key={habit.habitId} className="streak-card">
+            <div key={habit._id} className="streak-card">
               <div className="streak-icon">
                 <Flame
                   size={28}
@@ -52,9 +52,9 @@ export default function Streaks() {
                 <div className="streak-header-row">
                   <h3>{habit.name}</h3>
                   <div className="streak-badges">
-                    {scoreMap[habit.habitId] && (
+                    {scoreMap[habit._id] && (
                       <span className="score-inline">
-                        {Math.round(scoreMap[habit.habitId].score)}pts
+                        {Math.round(scoreMap[habit._id].score)}pts
                       </span>
                     )}
                   </div>

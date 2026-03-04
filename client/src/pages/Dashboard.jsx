@@ -47,39 +47,46 @@ export default function Dashboard() {
 
   // Scroll spy
   useEffect(() => {
-    const sections = [overviewRef.current, analyticsRef.current, habitsRef.current].filter(Boolean);
-    if (sections.length === 0) return;
+    const sections = [
+      overviewRef.current,
+      analyticsRef.current,
+      habitsRef.current
+    ].filter(Boolean);
 
-    const visibleMap = new Map();
+    if (sections.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            visibleMap.set(entry.target.id, entry.boundingClientRect.top);
-          } else {
-            visibleMap.delete(entry.target.id);
+            setActiveSection(entry.target.id);
           }
         });
-
-        if (visibleMap.size > 0) {
-          let closest = null;
-          let closestDist = Infinity;
-          visibleMap.forEach((top, id) => {
-            const dist = Math.abs(top);
-            if (dist < closestDist) {
-              closestDist = dist;
-              closest = id;
-            }
-          });
-          if (closest) setActiveSection(closest);
-        }
       },
-      { rootMargin: '-80px 0px -30% 0px', threshold: [0, 0.25] }
+      {
+        rootMargin: "-120px 0px -40% 0px",
+        threshold: 0.25
+      }
     );
 
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    sections.forEach((section) => observer.observe(section));
+
+    // Detect when user reaches bottom → activate habits
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 50
+      ) {
+        setActiveSection("dash-habits");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [loading]);
 
   const scrollTo = (id) => {

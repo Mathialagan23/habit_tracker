@@ -1,0 +1,45 @@
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config({ path: path.join(__dirname, '../../.env.example') });
+
+// Re-load from .env if it exists (overrides .env.example)
+dotenv.config({ path: path.join(__dirname, '../../.env'), override: true });
+
+module.exports = {
+  port: parseInt(process.env.PORT, 10) || 5000,
+  nodeEnv: process.env.NODE_ENV || 'development',
+
+  mongo: {
+    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/habit-tracker',
+  },
+
+  redis: {
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+  },
+
+  jwt: {
+    accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-access-secret',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+  },
+
+  rateLimit: {
+    windowSec: parseInt(process.env.RATE_LIMIT_WINDOW_SEC, 10) || 60,
+    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
+    authMaxRequests: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS, 10) || 20,
+  },
+
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  },
+
+  email: {
+    service: process.env.EMAIL_SERVICE || '',
+    apiKey: process.env.EMAIL_API_KEY || '',
+    from: process.env.EMAIL_FROM || '',
+  },
+};

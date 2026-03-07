@@ -8,15 +8,17 @@ const { normalizeDate, todayUTC } = require('../utils/date');
 const AppError = require('../utils/AppError');
 
 class LogService {
-  async create(habitId, userId, { date, note } = {}) {
+  async create(habitId, userId, { date, note, scheduleTime } = {}) {
     const habit = await Habit.findOne({ _id: habitId, userId });
     if (!habit) throw new AppError('Habit not found', 404, 'HABIT_NOT_FOUND');
 
     const logDate = date ? normalizeDate(date) : todayUTC();
+    const st = scheduleTime || null;
 
+    const filter = { habitId, date: logDate, scheduleTime: st };
     const log = await HabitLog.findOneAndUpdate(
-      { habitId, date: logDate },
-      { habitId, userId, date: logDate, note: note || '', completedAt: new Date() },
+      filter,
+      { habitId, userId, date: logDate, scheduleTime: st, note: note || '', completedAt: new Date() },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 

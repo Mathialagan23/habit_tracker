@@ -134,6 +134,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleScheduleToggle = async (habitId, scheduleTime, note) => {
+    try {
+      await logsApi.create(habitId, { scheduleTime, ...(note ? { note } : {}) });
+      setShowCelebration(true);
+      await fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to complete schedule');
+    }
+  };
+
   const handleEdit = (habit) => {
     setEditHabit(habit);
   };
@@ -298,6 +308,7 @@ export default function Dashboard() {
                 key={habit._id}
                 habit={habit}
                 onToggle={(note) => handleToggle(habit._id, note)}
+                onScheduleToggle={handleScheduleToggle}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />

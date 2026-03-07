@@ -16,6 +16,10 @@ const habitLogSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    scheduleTime: {
+      type: String,
+      default: null,
+    },
     note: {
       type: String,
       maxlength: 500,
@@ -29,7 +33,7 @@ const habitLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-habitLogSchema.index({ habitId: 1, date: 1 }, { unique: true });
+habitLogSchema.index({ habitId: 1, date: 1, scheduleTime: 1 }, { unique: true });
 habitLogSchema.index({ userId: 1, date: 1 });
 habitLogSchema.index({ habitId: 1, date: -1 });
 

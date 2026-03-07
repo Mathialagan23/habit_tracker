@@ -2165,6 +2165,117 @@ html.dark .celebration-toast {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
 }
 
+/* ===== Schedule Checklist (HabitCard) ===== */
+
+.habit-toggle-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.schedule-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.schedule-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.schedule-item:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.schedule-item.schedule-done {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: var(--primary);
+  color: var(--primary);
+  cursor: default;
+}
+
+.schedule-item.schedule-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.schedule-progress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.schedule-progress-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.schedule-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.schedule-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ===== Schedule Times Editor (Forms) ===== */
+
+.schedule-times-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.schedule-time-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.schedule-time-row input[type="time"] {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
 @media (max-width: 768px) {
   .achievements-grid {
     grid-template-columns: 1fr;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { habitsApi } from '../api';
 import toast from 'react-hot-toast';
+import { Plus, X } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
 const CATEGORIES = ['fitness', 'learning', 'productivity', 'mindfulness', 'health', 'other'];
@@ -19,6 +20,7 @@ export default function NewHabit() {
     difficulty: 'medium',
     reminderTime: '',
     frequency: { type: 'daily', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
+    schedule: [],
   });
   const [templates, setTemplates] = useState([]);
 
@@ -44,13 +46,31 @@ export default function NewHabit() {
     setForm({ ...form, frequency: { ...form.frequency, daysOfWeek: updated } });
   };
 
+  const addScheduleTime = () => {
+    setForm({ ...form, schedule: [...form.schedule, ''] });
+  };
+
+  const updateScheduleTime = (index, value) => {
+    const updated = [...form.schedule];
+    updated[index] = value;
+    setForm({ ...form, schedule: updated });
+  };
+
+  const removeScheduleTime = (index) => {
+    setForm({ ...form, schedule: form.schedule.filter((_, i) => i !== index) });
+  };
+
+  const isMultiSchedule = form.schedule.length > 1;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validSchedule = form.schedule.filter(Boolean);
     setLoading(true);
     try {
       await habitsApi.create({
         ...form,
-        reminderTime: form.reminderTime || null,
+        reminderTime: isMultiSchedule ? null : (form.reminderTime || null),
+        schedule: validSchedule,
       });
       toast.success('Habit created!');
       navigate('/');
@@ -160,7 +180,33 @@ export default function NewHabit() {
               type="time"
               value={form.reminderTime}
               onChange={(e) => setForm({ ...form, reminderTime: e.target.value })}
+              disabled={isMultiSchedule}
             />
+            {isMultiSchedule && (
+              <span className="form-hint">Disabled — schedule times act as reminders</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Schedule Times</label>
+            <p className="form-hint">Add multiple times to track this habit several times a day.</p>
+            <div className="schedule-times-editor">
+              {form.schedule.map((time, i) => (
+                <div key={i} className="schedule-time-row">
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => updateScheduleTime(i, e.target.value)}
+                  />
+                  <button type="button" className="btn-icon btn-icon-danger" onClick={() => removeScheduleTime(i)}>
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <button type="button" className="btn btn-secondary btn-sm" onClick={addScheduleTime}>
+                <Plus size={14} /> Add Time
+              </button>
+            </div>
           </div>
 
           <div className="form-group">

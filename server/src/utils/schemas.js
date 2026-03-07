@@ -40,6 +40,9 @@ const createHabitSchema = z.object({
     .nullable()
     .optional(),
   reminderEnabled: z.boolean().optional(),
+  schedule: z
+    .array(z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/))
+    .optional(),
 });
 
 const updateHabitSchema = z.object({
@@ -62,12 +65,20 @@ const updateHabitSchema = z.object({
     .nullable()
     .optional(),
   reminderEnabled: z.boolean().optional(),
+  schedule: z
+    .array(z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/))
+    .optional(),
 });
 
 // ── Logs ───────────────────────────────────
 const createLogSchema = z.object({
   date: z.string().datetime({ offset: true }).or(z.string().date()).optional(),
   note: z.string().max(500).optional(),
+  scheduleTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):([0-5]\d)$/)
+    .nullable()
+    .optional(),
 });
 
 // ── Users ──────────────────────────────────

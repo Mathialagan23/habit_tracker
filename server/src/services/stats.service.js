@@ -19,12 +19,41 @@ class StatsService {
       date: { $gte: weekAgo, $lte: today },
     }).lean();
 
-    const completedIds = new Set(todayLogs.map((l) => l.habitId.toString()));
+    // Build a map of habitId -> array of completed scheduleTimes for today
+    const todayLogsByHabit = {};
+    for (const log of todayLogs) {
+      const hid = log.habitId.toString();
+      if (!todayLogsByHabit[hid]) todayLogsByHabit[hid] = [];
+      todayLogsByHabit[hid].push(log.scheduleTime || null);
+    }
 
-    const habitsWithStatus = habits.map((h) => ({
-      ...h,
-      completedToday: completedIds.has(h._id.toString()),
-    }));
+    const habitsWithStatus = habits.map((h) => {
+      const hid = h._id.toString();
+      const logsForHabit = todayLogsByHabit[hid] || [];
+      const isMultiSchedule = Array.isArray(h.schedule) && h.schedule.length > 1;
+
+      if (isMultiSchedule) {
+        const completedTimes = logsForHabit.filter(Boolean);
+        return {
+          ...h,
+          completedToday: completedTimes.length >= h.schedule.length,
+          dailyProgress: {
+            completed: completedTimes.length,
+            total: h.schedule.length,
+          },
+          todayScheduleLogs: completedTimes,
+        };
+      }
+
+      return {
+        ...h,
+        completedToday: logsForHabit.length > 0,
+        dailyProgress: null,
+        todayScheduleLogs: [],
+      };
+    });
+
+    const completedCount = habitsWithStatus.filter((h) => h.completedToday).length;
 
     const totalExpectedWeek = habits.length * 7;
     const weeklyCompletionRate = totalExpectedWeek > 0
@@ -33,7 +62,7 @@ class StatsService {
 
     const data = {
       habits: habitsWithStatus,
-      todayCompleted: todayLogs.length,
+      todayCompleted: completedCount,
       todayTotal: habits.length,
       weeklyCompletionRate,
       totalActiveHabits: habits.length,

@@ -11,19 +11,28 @@ export default function useHabitReminder(habits) {
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       habits.forEach((habit) => {
-        if (!habit.reminderTime || habit.completedToday) return;
+        if (habit.completedToday) return;
 
-        const key = `${habit._id}-${currentTime}`;
-        if (habit.reminderTime === currentTime && !notifiedRef.current.has(key)) {
+        const isMultiSchedule = Array.isArray(habit.schedule) && habit.schedule.length > 1;
+        const timesToCheck = isMultiSchedule ? habit.schedule : (habit.reminderTime ? [habit.reminderTime] : []);
+
+        timesToCheck.forEach((time) => {
+          if (time !== currentTime) return;
+
+          // For multi-schedule, skip times already completed
+          if (isMultiSchedule && habit.todayScheduleLogs?.includes(time)) return;
+
+          const key = `${habit._id}-${time}`;
+          if (notifiedRef.current.has(key)) return;
           notifiedRef.current.add(key);
 
           if (Notification.permission === 'granted') {
-            new Notification('Habit Reminder', {
-              body: `Time to complete: ${habit.name}`,
-              icon: '/vite.svg',
-            });
+            const body = isMultiSchedule
+              ? `Scheduled: ${habit.name} (${time})`
+              : `Time to complete: ${habit.name}`;
+            new Notification('Habit Reminder', { body, icon: '/vite.svg' });
           }
-        }
+        });
       });
     };
 

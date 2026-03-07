@@ -55,6 +55,10 @@ const habitSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    schedule: {
+      type: [String],
+      default: [],
+    },
     lastReminderSent: {
       type: Date,
       default: null

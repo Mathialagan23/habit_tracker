@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useAuthStore from './store/authStore';
+import useThemeStore from './store/themeStore';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -9,6 +10,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NewHabit from './pages/NewHabit';
 import Streaks from './pages/Streaks';
+import Settings from './pages/Settings';
 import './App.css';
 
 function AppLayout({ children }) {
@@ -23,6 +25,10 @@ function AppLayout({ children }) {
 export default function App() {
   useEffect(() => {
     useAuthStore.getState().initialize();
+    useThemeStore.getState().initialize();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
   return (
@@ -57,6 +63,16 @@ export default function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Streaks />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Settings />
               </AppLayout>
             </ProtectedRoute>
           }

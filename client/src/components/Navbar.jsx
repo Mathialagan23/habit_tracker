@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Flame, LogOut } from 'lucide-react';
+import { LayoutDashboard, Flame, LogOut, Settings } from 'lucide-react';
 import useAuthStore from '../store/authStore';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const user = useAuthStore((s) => s.user);
@@ -18,6 +19,10 @@ export default function Navbar() {
         </NavLink>
       </div>
       <div className="navbar-right">
+        <ThemeToggle />
+        <NavLink to="/settings" className="btn-icon" title="Settings">
+          <Settings size={18} />
+        </NavLink>
         <span className="navbar-user">{user?.name}</span>
         <button className="btn btn-ghost" onClick={logout}>
           <LogOut size={16} /> Logout

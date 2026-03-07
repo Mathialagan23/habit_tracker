@@ -1,4 +1,5 @@
 const habitService = require('../services/habit.service');
+const habitTemplates = require('../data/habitTemplates');
 
 exports.list = async (req, res, next) => {
   try {
@@ -44,4 +45,8 @@ exports.remove = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+exports.templates = (_req, res) => {
+  res.json({ data: habitTemplates });
 };

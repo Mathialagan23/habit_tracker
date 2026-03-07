@@ -1,6 +1,6 @@
 const HabitLog = require('../models/HabitLog');
 const Habit = require('../models/Habit');
-const { streakQueue } = require('../config/queues');
+const streakService = require('./streak.service');
 const cacheService = require('./cache.service');
 const { normalizeDate, todayUTC } = require('../utils/date');
 const AppError = require('../utils/AppError');
@@ -18,9 +18,7 @@ class LogService {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    try {
-      await streakQueue.add('recalc', { habitId: habitId.toString(), userId: userId.toString() });
-    } catch {}
+    await streakService.recalculate(habitId);
 
     await Promise.all([
       cacheService.del(`dashboard:${userId}`),
@@ -38,9 +36,7 @@ class LogService {
 
     await HabitLog.deleteOne({ _id: logId });
 
-    try {
-      await streakQueue.add('recalc', { habitId: log.habitId.toString(), userId: userId.toString() });
-    } catch {}
+    await streakService.recalculate(log.habitId);
 
     await Promise.all([
       cacheService.del(`dashboard:${userId}`),

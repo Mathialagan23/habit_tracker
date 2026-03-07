@@ -7,6 +7,7 @@ import EditHabitModal from '../components/EditHabitModal';
 import WeeklyChart from '../components/WeeklyChart';
 import MonthlyChart from '../components/MonthlyChart';
 import HeatMap from '../components/HeatMap';
+import useHabitReminder from '../hooks/useHabitReminder';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -17,6 +18,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [editHabit, setEditHabit] = useState(null);
   const [activeSection, setActiveSection] = useState('dash-overview');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
+  useHabitReminder(dashboard?.habits);
 
   const overviewRef = useRef(null);
   const analyticsRef = useRef(null);
@@ -132,6 +136,10 @@ export default function Dashboard() {
 
   const habits = dashboard?.habits || [];
   const stats = dashboard || {};
+  const CATEGORIES = ['all', 'fitness', 'learning', 'productivity', 'mindfulness', 'health', 'other'];
+  const filteredHabits = categoryFilter === 'all'
+    ? habits
+    : habits.filter((h) => h.category === categoryFilter);
 
   return (
     <div className="page">
@@ -195,13 +203,28 @@ export default function Dashboard() {
 
       <div id="dash-habits" ref={habitsRef}>
         <h2 className="section-title">Your Habits</h2>
-        {habits.length === 0 ? (
+        <div className="category-filter">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c}
+              className={`category-filter-btn ${categoryFilter === c ? 'active' : ''}`}
+              onClick={() => setCategoryFilter(c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+        {filteredHabits.length === 0 ? (
           <div className="empty-state">
-            No habits yet. <Link to="/habits/new">Create your first habit</Link>
+            {habits.length === 0 ? (
+              <>No habits yet. <Link to="/habits/new">Create your first habit</Link></>
+            ) : (
+              'No habits in this category.'
+            )}
           </div>
         ) : (
           <div className="habit-list">
-            {habits.map((habit) => (
+            {filteredHabits.map((habit) => (
               <HabitCard
                 key={habit._id}
                 habit={habit}

@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth.routes');
 const habitRoutes = require('./routes/habit.routes');
 const logRoutes = require('./routes/log.routes');
 const statsRoutes = require('./routes/stats.routes');
+const userRoutes = require('./routes/user.routes');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/habits', logRoutes); // nested: /api/habits/:habitId/logs
 app.use('/api/stats', statsRoutes);
+app.use('/api/users', userRoutes);
 
 // ── 404 handler ─────────────────────────────────
 app.use((_req, res) => {

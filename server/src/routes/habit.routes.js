@@ -9,6 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', habitCtrl.list);
+router.get('/templates', habitCtrl.templates);
 router.get('/:id', habitCtrl.getById);
 router.post('/', validate(createHabitSchema), habitCtrl.create);
 router.patch('/:id', validate(updateHabitSchema), habitCtrl.update);

@@ -14,6 +14,7 @@ export const habitsApi = {
   create: (data) => api.post('/habits', data),
   update: (id, data) => api.patch(`/habits/${id}`, data),
   remove: (id) => api.delete(`/habits/${id}`),
+  templates: () => api.get('/habits/templates'),
 };
 
 export const logsApi = {
@@ -29,4 +30,10 @@ export const statsApi = {
   monthly: () => api.get('/stats/monthly'),
   heatmap: () => api.get('/stats/heatmap'),
   scores: () => api.get('/stats/scores'),
+};
+
+export const usersApi = {
+  updateProfile: (data) => api.put('/users/profile', data),
+  changePassword: (data) => api.put('/users/password', data),
+  deleteAccount: () => api.delete('/users'),
 };

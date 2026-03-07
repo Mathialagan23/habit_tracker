@@ -14,12 +14,6 @@ module.exports = {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/habit-tracker',
   },
 
-  redis: {
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
-  },
-
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-access-secret',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
@@ -38,8 +32,9 @@ module.exports = {
   },
 
   email: {
-    service: process.env.EMAIL_SERVICE || '',
-    apiKey: process.env.EMAIL_API_KEY || '',
-    from: process.env.EMAIL_FROM || '',
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || '',
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || '',
   },
 };

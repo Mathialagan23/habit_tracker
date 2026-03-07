@@ -51,6 +51,14 @@ const habitSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    reminderEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    lastReminderSent: {
+      type: Date,
+      default: null
+    },
     isArchived: {
       type: Boolean,
       default: false,

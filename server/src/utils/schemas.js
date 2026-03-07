@@ -39,6 +39,7 @@ const createHabitSchema = z.object({
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/)
     .nullable()
     .optional(),
+  reminderEnabled: z.boolean().optional(),
 });
 
 const updateHabitSchema = z.object({
@@ -60,12 +61,25 @@ const updateHabitSchema = z.object({
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/)
     .nullable()
     .optional(),
+  reminderEnabled: z.boolean().optional(),
 });
 
 // ── Logs ───────────────────────────────────
 const createLogSchema = z.object({
   date: z.string().datetime({ offset: true }).or(z.string().date()).optional(),
   note: z.string().max(500).optional(),
+});
+
+// ── Users ──────────────────────────────────
+const updateProfileSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  email: z.string().email().optional(),
+  avatar: z.string().max(500).optional(),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8),
 });
 
 module.exports = {
@@ -75,4 +89,6 @@ module.exports = {
   createHabitSchema,
   updateHabitSchema,
   createLogSchema,
+  updateProfileSchema,
+  changePasswordSchema,
 };

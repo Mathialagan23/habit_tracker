@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { habitsApi } from '../api';
 import toast from 'react-hot-toast';
@@ -20,6 +20,21 @@ export default function NewHabit() {
     reminderTime: '',
     frequency: { type: 'daily', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
   });
+  const [templates, setTemplates] = useState([]);
+
+  useEffect(() => {
+    habitsApi.templates().then((res) => setTemplates(res.data.data)).catch(() => {});
+  }, []);
+
+  const applyTemplate = (t) => {
+    setForm({
+      ...form,
+      name: t.name,
+      description: t.description || '',
+      category: t.category || 'other',
+      difficulty: t.difficulty || 'medium',
+    });
+  };
 
   const toggleDay = (day) => {
     const current = form.frequency.daysOfWeek;
@@ -49,6 +64,31 @@ export default function NewHabit() {
   return (
     <div className="page">
       <h1>New Habit</h1>
+
+      {templates.length > 0 && (
+        <div className="templates-section">
+          <h3>Quick Start from Template</h3>
+          <div className="templates-grid">
+            {templates.map((t) => (
+              <button
+                key={t.name}
+                type="button"
+                className="template-card"
+                onClick={() => applyTemplate(t)}
+              >
+                <span className="template-name">{t.name}</span>
+                <span className="template-meta">
+                  <span className="category-badge">{t.category}</span>
+                  <span className="difficulty-badge" style={{
+                    color: t.difficulty === 'hard' ? '#f43f5e' : t.difficulty === 'easy' ? '#10b981' : '#f59e0b',
+                  }}>{t.difficulty}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="habit-form">
         <form onSubmit={handleSubmit}>
           <div className="form-group">

@@ -12,5 +12,6 @@ router.get('/weekly', statsCtrl.weekly);
 router.get('/monthly', statsCtrl.monthly);
 router.get('/heatmap', statsCtrl.heatmap);
 router.get('/scores', statsCtrl.scores);
+router.get('/gamification', statsCtrl.gamification);
 
 module.exports = router;

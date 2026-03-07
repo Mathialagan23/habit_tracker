@@ -1,5 +1,7 @@
 const Habit = require('../models/Habit');
 const cacheService = require('./cache.service');
+const xpService = require('./xp.service');
+const achievementService = require('./achievement.service');
 const AppError = require('../utils/AppError');
 
 class HabitService {
@@ -18,6 +20,11 @@ class HabitService {
   async create(userId, data) {
     const habit = await Habit.create({ ...data, userId });
     await cacheService.del(`dashboard:${userId}`);
+
+    // +20 XP for creating a new habit
+    await xpService.addXP(userId, 20);
+    await achievementService.checkAchievements(userId);
+
     return habit;
   }
 

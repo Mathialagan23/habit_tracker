@@ -30,10 +30,19 @@ export const statsApi = {
   monthly: () => api.get('/stats/monthly'),
   heatmap: () => api.get('/stats/heatmap'),
   scores: () => api.get('/stats/scores'),
+  gamification: () => api.get('/stats/gamification'),
 };
 
 export const usersApi = {
   updateProfile: (data) => api.put('/users/profile', data),
+  uploadAvatar: (formData) => api.post('/users/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  updatePreferences: (data) => api.patch('/users/preferences', data),
   changePassword: (data) => api.put('/users/password', data),
   deleteAccount: () => api.delete('/users'),
+};
+
+export const analyticsApi = {
+  premium: () => api.get('/analytics/premium'),
 };

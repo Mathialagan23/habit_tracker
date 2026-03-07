@@ -1,6 +1,8 @@
 const HabitLog = require('../models/HabitLog');
 const Habit = require('../models/Habit');
 const streakService = require('./streak.service');
+const xpService = require('./xp.service');
+const achievementService = require('./achievement.service');
 const cacheService = require('./cache.service');
 const { normalizeDate, todayUTC } = require('../utils/date');
 const AppError = require('../utils/AppError');
@@ -18,7 +20,15 @@ class LogService {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    await streakService.recalculate(habitId);
+    const { currentStreak } = await streakService.recalculate(habitId);
+
+    // XP: +10 for completion, +5 bonus if streak >= 3
+    let xpEarned = 10;
+    if (currentStreak >= 3) xpEarned += 5;
+    await xpService.addXP(userId, xpEarned);
+
+    // Check achievements
+    await achievementService.checkAchievements(userId);
 
     await Promise.all([
       cacheService.del(`dashboard:${userId}`),

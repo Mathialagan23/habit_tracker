@@ -1,15 +1,26 @@
 import { useState } from 'react';
-import { Check, Circle, Pencil, Trash2 } from 'lucide-react';
+import { Check, Circle, Pencil, Trash2, MessageSquare } from 'lucide-react';
 
 export default function HabitCard({ habit, onToggle, onEdit, onDelete }) {
   const [animating, setAnimating] = useState(false);
+  const [showNote, setShowNote] = useState(false);
+  const [note, setNote] = useState('');
 
   const handleToggle = () => {
     if (!habit.completedToday) {
       setAnimating(true);
       setTimeout(() => setAnimating(false), 600);
+      onToggle(note);
+      setShowNote(false);
+      setNote('');
+    } else {
+      onToggle('');
     }
-    onToggle();
+  };
+
+  const handleNoteToggle = (e) => {
+    e.stopPropagation();
+    setShowNote((prev) => !prev);
   };
 
   return (
@@ -31,6 +42,11 @@ export default function HabitCard({ habit, onToggle, onEdit, onDelete }) {
         <div className="habit-card-top">
           <h3 className={habit.completedToday ? 'line-through' : ''}>{habit.name}</h3>
           <div className="habit-card-actions">
+            {!habit.completedToday && (
+              <button className="btn-icon" onClick={handleNoteToggle} title="Add note">
+                <MessageSquare size={14} />
+              </button>
+            )}
             <button className="btn-icon" onClick={() => onEdit(habit)}>
               <Pencil size={14} />
             </button>
@@ -43,6 +59,17 @@ export default function HabitCard({ habit, onToggle, onEdit, onDelete }) {
           <p className="text-muted" style={{ fontSize: '0.8rem' }}>
             {habit.description}
           </p>
+        )}
+        {showNote && !habit.completedToday && (
+          <input
+            className="habit-note-input"
+            type="text"
+            placeholder="Add a note (optional)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            maxLength={500}
+            onClick={(e) => e.stopPropagation()}
+          />
         )}
         <div className="habit-card-meta">
           {habit.category && habit.category !== 'other' && (

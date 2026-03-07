@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import useAuthStore from './store/authStore';
 import useThemeStore from './store/themeStore';
 import Navbar from './components/Navbar';
+import MobileNav from './components/MobileNav';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,6 +12,9 @@ import Dashboard from './pages/Dashboard';
 import NewHabit from './pages/NewHabit';
 import Streaks from './pages/Streaks';
 import Settings from './pages/Settings';
+import ProfilePage from './pages/profile/ProfilePage';
+import SettingsPage from './pages/settings/SettingsPage';
+import Onboarding from './pages/Onboarding';
 import './App.css';
 
 function AppLayout({ children }) {
@@ -18,6 +22,7 @@ function AppLayout({ children }) {
     <>
       <Navbar />
       <div className="main-content">{children}</div>
+      <MobileNav />
     </>
   );
 }
@@ -68,12 +73,30 @@ export default function App() {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ProfilePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <ProtectedRoute>
               <AppLayout>
-                <Settings />
+                <SettingsPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <Onboarding />
             </ProtectedRoute>
           }
         />

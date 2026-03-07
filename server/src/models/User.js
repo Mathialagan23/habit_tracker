@@ -31,7 +31,24 @@ const userSchema = new mongoose.Schema(
     preferences: {
       reminderTime: { type: String, default: '08:00' },
       emailDigest: { type: Boolean, default: false },
+      pushNotifications: { type: Boolean, default: true },
+      reminderSounds: { type: Boolean, default: false },
+      weekStartsMonday: { type: Boolean, default: false },
     },
+    xp: {
+      type: Number,
+      default: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+    },
+    achievements: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Achievement',
+      },
+    ],
     refreshTokens: [
       {
         tokenHash: String,

@@ -1,19 +1,18 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { usersApi } from '../api';
-import useAuthStore from '../store/authStore';
+import { usersApi } from '../../api';
+import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
-import { Camera, Upload, User, Mail, Link, Lock, Trash2 } from 'lucide-react';
+import { Camera, Upload, User, Mail, Link } from 'lucide-react';
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 function isValidImageUrl(url) {
   if (!url) return true;
   return /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(url);
 }
 
-export default function Settings() {
-  const navigate = useNavigate();
+export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
   const fileInputRef = useRef(null);
 
   const [profile, setProfile] = useState({
@@ -23,12 +22,19 @@ export default function Settings() {
   });
   const [avatarError, setAvatarError] = useState(false);
   const [avatarValidation, setAvatarValidation] = useState('');
-  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' });
   const [savingProfile, setSavingProfile] = useState(false);
-  const [savingPassword, setSavingPassword] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const generatedAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name || 'User')}`;
-  const displayAvatar = (!profile.avatar || avatarError) ? generatedAvatar : profile.avatar;
+
+  const resolveAvatarUrl = (avatar) => {
+    if (!avatar) return null;
+    if (avatar.startsWith('http') || avatar.startsWith('blob:')) return avatar;
+    return `${API_BASE}${avatar}`;
+  };
+
+  const resolved = resolveAvatarUrl(profile.avatar);
+  const displayAvatar = (!resolved || avatarError) ? generatedAvatar : resolved;
 
   const handleAvatarUrlChange = (e) => {
     const url = e.target.value;
@@ -41,18 +47,29 @@ export default function Settings() {
     }
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setProfile({ ...profile, avatar: preview });
-    setAvatarError(false);
-    setAvatarValidation('');
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      const { data } = await usersApi.uploadAvatar(formData);
+      useAuthStore.setState({ user: data.data });
+      setProfile((prev) => ({ ...prev, avatar: data.data.avatar }));
+      setAvatarError(false);
+      setAvatarValidation('');
+      toast.success('Avatar uploaded');
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleProfileSave = async (e) => {
     e.preventDefault();
-    if (profile.avatar && !isValidImageUrl(profile.avatar)) {
+    if (profile.avatar && !isValidImageUrl(profile.avatar) && !profile.avatar.startsWith('/uploads')) {
       toast.error('Please enter a valid image URL');
       return;
     }
@@ -68,38 +85,11 @@ export default function Settings() {
     }
   };
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    setSavingPassword(true);
-    try {
-      await usersApi.changePassword(passwords);
-      setPasswords({ currentPassword: '', newPassword: '' });
-      toast.success('Password updated');
-    } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to change password');
-    } finally {
-      setSavingPassword(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm('Delete your account? All data will be permanently removed.')) return;
-    try {
-      await usersApi.deleteAccount();
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to delete account');
-    }
-  };
-
   return (
     <div className="page">
-      <h1>Settings</h1>
+      <h1>Profile</h1>
 
       <div className="settings-section">
-        <h2>Profile</h2>
-
         <div className="profile-header">
           <div className="profile-avatar-wrapper">
             <img
@@ -113,6 +103,7 @@ export default function Settings() {
               className="profile-avatar-edit"
               onClick={() => fileInputRef.current?.click()}
               title="Upload avatar"
+              disabled={uploadingAvatar}
             >
               <Camera size={14} />
             </button>
@@ -165,49 +156,14 @@ export default function Settings() {
             type="button"
             className="btn btn-secondary btn-upload"
             onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
           >
-            <Upload size={14} /> Upload Avatar
+            <Upload size={14} /> {uploadingAvatar ? 'Uploading...' : 'Upload Avatar'}
           </button>
           <button type="submit" className="btn btn-primary" disabled={savingProfile}>
             {savingProfile ? 'Saving...' : 'Save Profile'}
           </button>
         </form>
-      </div>
-
-      <div className="settings-section">
-        <h2><Lock size={16} className="form-label-icon" /> Change Password</h2>
-        <form onSubmit={handlePasswordChange} className="settings-form">
-          <div className="form-group">
-            <label>Current Password</label>
-            <input
-              type="password"
-              value={passwords.currentPassword}
-              onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>New Password</label>
-            <input
-              type="password"
-              value={passwords.newPassword}
-              onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-              minLength={8}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={savingPassword}>
-            {savingPassword ? 'Updating...' : 'Change Password'}
-          </button>
-        </form>
-      </div>
-
-      <div className="settings-section settings-danger">
-        <h2><Trash2 size={16} className="form-label-icon" /> Danger Zone</h2>
-        <p className="text-muted">Permanently delete your account and all associated data.</p>
-        <button className="btn btn-danger" onClick={handleDelete}>
-          Delete Account
-        </button>
       </div>
     </div>
   );

@@ -3,12 +3,18 @@ const app = require('./app');
 const config = require('./config');
 const connectDB = require('./config/database');
 const { startReminderJob } = require('./jobs/reminder.job');
+const { startWeeklyReportJob } = require('./jobs/weeklyReport.job');
+const achievementService = require('./services/achievement.service');
 const logger = require('./utils/logger');
 
 const start = async () => {
   await connectDB();
 
+  // Seed default achievements
+  await achievementService.seed();
+
   startReminderJob();
+  startWeeklyReportJob();
 
   const server = app.listen(config.port, () => {
     logger.info(`Server running on port ${config.port} [${config.nodeEnv}]`);

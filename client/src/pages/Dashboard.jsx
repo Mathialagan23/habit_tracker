@@ -1,24 +1,36 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, BarChart3, LayoutDashboard, ListChecks } from 'lucide-react';
-import { habitsApi, logsApi, statsApi } from '../api';
+import { habitsApi, logsApi, statsApi, analyticsApi } from '../api';
 import HabitCard from '../components/HabitCard';
 import EditHabitModal from '../components/EditHabitModal';
 import WeeklyChart from '../components/WeeklyChart';
 import MonthlyChart from '../components/MonthlyChart';
 import HeatMap from '../components/HeatMap';
+import ConfettiAnimation from '../components/celebration/ConfettiAnimation';
+import XPProgress from '../components/gamification/XPProgress';
+import StreakFlame from '../components/gamification/StreakFlame';
+import AchievementBadge from '../components/gamification/AchievementBadge';
+import ConsistencyScoreCard from '../components/analytics/ConsistencyScoreCard';
+import BestDayCard from '../components/analytics/BestDayCard';
+import HabitSuccessRates from '../components/analytics/HabitSuccessRates';
+import HabitCorrelation from '../components/analytics/HabitCorrelation';
 import useHabitReminder from '../hooks/useHabitReminder';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
   const [weekly, setWeekly] = useState(null);
   const [monthly, setMonthly] = useState(null);
   const [heatmap, setHeatmap] = useState(null);
+  const [gamification, setGamification] = useState(null);
+  const [premium, setPremium] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editHabit, setEditHabit] = useState(null);
   const [activeSection, setActiveSection] = useState('dash-overview');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useHabitReminder(dashboard?.habits);
 
@@ -28,16 +40,20 @@ export default function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [dashRes, weekRes, monthRes, heatRes] = await Promise.all([
+      const [dashRes, weekRes, monthRes, heatRes, gamRes, premRes] = await Promise.all([
         statsApi.dashboard(),
         statsApi.weekly(),
         statsApi.monthly(),
         statsApi.heatmap(),
+        statsApi.gamification(),
+        analyticsApi.premium(),
       ]);
       setDashboard(dashRes.data.data);
       setWeekly(weekRes.data.data);
       setMonthly(monthRes.data.data);
       setHeatmap(heatRes.data.data);
+      setGamification(gamRes.data.data);
+      setPremium(premRes.data.data);
     } catch (err) {
       toast.error('Failed to load dashboard');
     } finally {
@@ -48,6 +64,13 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Redirect to onboarding if user has no habits
+  useEffect(() => {
+    if (!loading && dashboard && dashboard.habits && dashboard.habits.length === 0) {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [loading, dashboard, navigate]);
 
   // Scroll spy
   useEffect(() => {
@@ -97,9 +120,14 @@ export default function Dashboard() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleToggle = async (habitId) => {
+  const handleToggle = async (habitId, note) => {
+    const habit = habits.find((h) => h._id === habitId);
+    const wasCompleted = habit?.completedToday;
     try {
-      await logsApi.create(habitId);
+      await logsApi.create(habitId, note ? { note } : {});
+      if (!wasCompleted) {
+        setShowCelebration(true);
+      }
       await fetchData();
     } catch (err) {
       toast.error(err.response?.data?.error?.message || 'Failed to toggle habit');
@@ -183,13 +211,24 @@ export default function Dashboard() {
           </div>
           <div className="stat-card">
             <span className="stat-value">{stats.weeklyCompletionRate || 0}%</span>
-            <span className="stat-label">Weekly Rate</span>
+            <span className="stat-label">Weekly Completion</span>
           </div>
           <div className="stat-card">
             <span className="stat-value">{monthly?.consistencyScore || 0}%</span>
-            <span className="stat-label">Consistency</span>
+            <span className="stat-label">Overall Consistency</span>
           </div>
         </div>
+
+        {gamification && (
+          <div className="gamification-row">
+            <div className="gamification-card">
+              <StreakFlame streak={Math.max(0, ...habits.map((h) => h.currentStreak || 0))} />
+            </div>
+            <div className="gamification-card">
+              <XPProgress xp={gamification.xp} level={gamification.level} />
+            </div>
+          </div>
+        )}
       </div>
 
       <div id="dash-analytics" ref={analyticsRef}>
@@ -199,6 +238,36 @@ export default function Dashboard() {
           <WeeklyChart data={weekly} totalHabits={stats.totalActiveHabits || 0} />
           <MonthlyChart data={monthly} />
         </div>
+
+        {gamification?.achievements?.length > 0 && (
+          <div className="achievements-section">
+            <h3 className="section-title">Achievements</h3>
+            <div className="achievements-grid">
+              {gamification.achievements.map((a) => (
+                <AchievementBadge key={a._id} achievement={a} unlocked={a.unlocked} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {premium && (
+          <div className="premium-insights">
+            <h2 className="section-title">Premium Insights</h2>
+            <div className="premium-grid">
+              <ConsistencyScoreCard
+                score={premium.consistencyScore?.score || 0}
+                level={premium.consistencyScore?.level || 'Needs Improvement'}
+              />
+              <BestDayCard
+                bestDay={premium.bestDay?.bestDay || 'N/A'}
+                completionCount={premium.bestDay?.completionCount || 0}
+                dayCounts={premium.bestDay?.dayCounts}
+              />
+              <HabitSuccessRates rates={premium.habitSuccessRates} />
+              <HabitCorrelation correlations={premium.correlations} />
+            </div>
+          </div>
+        )}
       </div>
 
       <div id="dash-habits" ref={habitsRef}>
@@ -228,7 +297,7 @@ export default function Dashboard() {
               <HabitCard
                 key={habit._id}
                 habit={habit}
-                onToggle={() => handleToggle(habit._id)}
+                onToggle={(note) => handleToggle(habit._id, note)}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
@@ -244,6 +313,11 @@ export default function Dashboard() {
           onClose={() => setEditHabit(null)}
         />
       )}
+
+      <ConfettiAnimation
+        show={showCelebration}
+        onDone={() => setShowCelebration(false)}
+      />
     </div>
   );
 }

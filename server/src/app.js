@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -12,11 +13,12 @@ const habitRoutes = require('./routes/habit.routes');
 const logRoutes = require('./routes/log.routes');
 const statsRoutes = require('./routes/stats.routes');
 const userRoutes = require('./routes/user.routes');
+const premiumAnalyticsRoutes = require('./routes/premiumAnalytics.routes');
 
 const app = express();
 
 // ── Global middleware ───────────────────────────
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({ origin: config.cors.origin, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(requestId);
@@ -24,6 +26,9 @@ app.use(requestId);
 if (config.nodeEnv !== 'test') {
   app.use(morgan('short'));
 }
+
+// ── Static files ────────────────────────────────
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // ── Health checks ───────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
@@ -39,6 +44,7 @@ app.use('/api/habits', habitRoutes);
 app.use('/api/habits', logRoutes); // nested: /api/habits/:habitId/logs
 app.use('/api/stats', statsRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/analytics', premiumAnalyticsRoutes);
 
 // ── 404 handler ─────────────────────────────────
 app.use((_req, res) => {

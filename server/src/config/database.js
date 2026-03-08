@@ -1,16 +1,37 @@
-// 
+// const mongoose = require('mongoose');
+// const config = require('./index');
+// const logger = require('../utils/logger');
+
+// import mongoose from "mongoose";
+
+// export const connectDB = async () => {
+//   try {
+//     await mongoose.connect(process.env.MONGO_URI);
+
+//     console.log("MongoDB connected");
+//   } catch (error) {
+//     console.error("MongoDB connection error", error);
+//     process.exit(1);
+//   }
+//  };
+
+// module.exports = connectDB;
 
 // for render deploy
 
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+const config = require("./index");
+const logger = require("../utils/logger");
 
-export const connectDB = async () => {
+const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(config.mongoUri);
 
-    console.log("✅ MongoDB connected");
+    logger.info("✅ MongoDB connected");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    logger.error({ error }, "MongoDB connection error");
     process.exit(1);
   }
 };
+
+module.exports = connectDB;

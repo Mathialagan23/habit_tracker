@@ -25,7 +25,7 @@ const logger = require("../utils/logger");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(config.MONGODB_URI);
+    await mongoose.connect(config.mongo.uri);
 
     logger.info("✅ MongoDB connected");
   } catch (error) {

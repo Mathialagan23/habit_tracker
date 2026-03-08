@@ -4,6 +4,7 @@ import { LayoutDashboard, Flame, LogOut, Settings, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/authStore';
 import ThemeToggle from './ThemeToggle';
+import InstallPWA from './InstallPWA';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -49,6 +50,7 @@ export default function Navbar() {
         </NavLink>
       </div>
       <div className="navbar-right">
+        <InstallPWA />
         <ThemeToggle />
         <div className="navbar-avatar-container" ref={dropdownRef}>
           <button

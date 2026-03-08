@@ -5,6 +5,7 @@ import useAuthStore from './store/authStore';
 import useThemeStore from './store/themeStore';
 import Navbar from './components/Navbar';
 import MobileNav from './components/MobileNav';
+import InstallPrompt from './components/InstallPrompt';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -23,6 +24,7 @@ function AppLayout({ children }) {
       <Navbar />
       <div className="main-content">{children}</div>
       <MobileNav />
+      <InstallPrompt />
     </>
   );
 }

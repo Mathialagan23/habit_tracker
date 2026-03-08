@@ -11,10 +11,20 @@ function getTier(streak) {
   return TIERS.find((t) => streak >= t.min) || null;
 }
 
-export default function StreakFlame({ streak }) {
-  if (!streak || streak < 1) return null;
-
+export default function StreakFlame({ streak, habitName }) {
   const tier = getTier(streak);
+
+  if (!streak || streak < 1) {
+    return (
+      <div className="streak-flame streak-flame-empty">
+        <span className="streak-flame-icon">🔥</span>
+        <div className="streak-flame-info">
+          <span className="streak-flame-count">No active streak</span>
+          <span className="streak-flame-sub">Complete a habit to start</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -27,7 +37,13 @@ export default function StreakFlame({ streak }) {
         🔥
       </span>
       <div className="streak-flame-info">
-        <span className="streak-flame-count">{streak} Day Streak</span>
+        <span className="streak-flame-label">Best Streak</span>
+        <span className="streak-flame-count">
+          {streak} {streak === 1 ? 'day' : 'days'}
+        </span>
+        {habitName && (
+          <span className="streak-flame-habit">{habitName}</span>
+        )}
         {tier && (
           <span className="streak-flame-tier" style={{ color: tier.color }}>
             {tier.label}

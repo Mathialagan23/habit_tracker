@@ -232,7 +232,16 @@ export default function Dashboard() {
         {gamification && (
           <div className="gamification-row">
             <div className="gamification-card">
-              <StreakFlame streak={Math.max(0, ...habits.map((h) => h.currentStreak || 0))} />
+              <StreakFlame
+                streak={Math.max(0, ...habits.map((h) => h.currentStreak || 0))}
+                habitName={
+                  habits.length > 0
+                    ? habits.reduce((best, h) =>
+                        (h.currentStreak || 0) > (best.currentStreak || 0) ? h : best
+                      ).name
+                    : undefined
+                }
+              />
             </div>
             <div className="gamification-card">
               <XPProgress xp={gamification.xp} level={gamification.level} />

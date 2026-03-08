@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Flame } from 'lucide-react';
+import { Flame, Trophy } from 'lucide-react';
 import { statsApi } from '../api';
 import toast from 'react-hot-toast';
 
 export default function Streaks() {
   const [streaks, setStreaks] = useState([]);
-  const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [streakRes, scoreRes] = await Promise.all([
-          statsApi.streaks(),
-          statsApi.scores(),
-        ]);
+        const streakRes = await statsApi.streaks();
         setStreaks(streakRes.data.data || []);
-        setScores(scoreRes.data.data || []);
       } catch (err) {
         toast.error('Failed to load streaks');
       } finally {
@@ -27,11 +22,6 @@ export default function Streaks() {
   }, []);
 
   if (loading) return <div className="loading">Loading...</div>;
-
-  const scoreMap = {};
-  scores.forEach((s) => {
-    scoreMap[s.habitId] = s;
-  });
 
   return (
     <div className="page">
@@ -49,22 +39,15 @@ export default function Streaks() {
                 />
               </div>
               <div className="streak-info">
-                <div className="streak-header-row">
-                  <h3>{habit.name}</h3>
-                  <div className="streak-badges">
-                    {scoreMap[habit._id] && (
-                      <span className="score-inline">
-                        {Math.round(scoreMap[habit._id].score)}pts
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <h3>{habit.name}</h3>
                 <div className="streak-numbers">
                   <span className="current-streak">
-                    {habit.currentStreak}d current
+                    <Flame size={14} />
+                    Current: {habit.currentStreak} {habit.currentStreak === 1 ? 'day' : 'days'}
                   </span>
                   <span className="best-streak">
-                    {habit.bestStreak}d best
+                    <Trophy size={14} />
+                    Best: {habit.bestStreak} {habit.bestStreak === 1 ? 'day' : 'days'}
                   </span>
                 </div>
               </div>
